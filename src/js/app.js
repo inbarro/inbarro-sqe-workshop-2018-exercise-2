@@ -1,38 +1,32 @@
 import $ from 'jquery';
 import {parseCode} from './code-analyzer';
-import {parsedCodeToTable} from './code-analyzer';
 import {parsedCodeToSymbolicSubstitutionWithColor} from './code-analyzer';
+
 
 $(document).ready(function () {
     $('#codeSubmissionButton').click(() => {
         let codeToParse = $('#codePlaceholder').val();
         let parsedCode = parseCode(codeToParse);
         console.log(parsedCode);
-        let myTable = parsedCodeToTable(parsedCode);
-
-        //building table from myTable
         $('#parsedCode').val(JSON.stringify(parsedCode, null, 2));
-        let tbl = $('<table/>').attr('Line', 'myTable');
-        $('#div1').append(tbl);
-        let tr = '<tr>';    let td1 = '<th>' + ['Line'] + '</th>';   let td2 = '<th>' + ['Type'] + '</th>';
-        let td3 = '<th>' +['Name'] + '</th>';
-        let td4 = '<th>' +['Condition'] + '</th>';
-        let td5 = '<th>' + ['Value'] + '</th></tr>';
-        $('#myTable').append(tr + td1 + td2 + td3 + td4 + td5);
-        for (let i = 0; i < myTable.length; i++) {
-            let tr = '<tr>'; let td1 = '<td>' + myTable[i]['Line'] + '</td>';   let td2 = '<td>' + myTable[i]['Type'] + '</td>';
-            let td3 = '<td>' + myTable[i]['Name'] + '</td>';
-            let td4 = '<td>' + myTable[i]['Condition'] + '</td>';
-            let td5 = '<td>' + myTable[i]['Value'] + '</td></tr>';
-            $('#myTable').append(tr + td1 + td2 + td3 + td4 + td5);
-        }
         $('#symbolicSubstitutionButton').click(() => {
             let args =  $('#arguments').val();
-            let symbolicSubstitutionCode = parsedCodeToSymbolicSubstitutionWithColor(args,parsedCode);
+            let symbolicSubstitutionCodeJson = parsedCodeToSymbolicSubstitutionWithColor(args,parsedCode);
+            document.querySelectorAll('span').forEach(function(a){
+                a.remove();
+            }); document.querySelectorAll('br').forEach(function(a){
+                a.remove();
+            });for (let i=0; i< symbolicSubstitutionCodeJson.length ; i++)   {
+                let span = document.createElement('span');
+                let text = document.createTextNode(symbolicSubstitutionCodeJson[i].str);
+                span.style.backgroundColor = symbolicSubstitutionCodeJson[i].color;
+                span.id = 'texting'+i;   span.appendChild(text);
+                document.body.appendChild(span);
+                document.body.appendChild(document.createElement('br'));
+            } }); }); });
 
-        });
-    });
-});
+
+
 
 
 

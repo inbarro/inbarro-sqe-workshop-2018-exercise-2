@@ -1,272 +1,267 @@
 import assert from 'assert';
 import {parseCode} from '../src/js/code-analyzer';
-import {parsedCodeToTable} from '../src/js/code-analyzer';
+import {parsedCodeToSymbolicSubstitutionWithColor} from '../src/js/code-analyzer';
 
 describe('function declaration', () => {
-    let inputCode = 'function onlyDeclaration(){ }';
+    let inputCode = 'function foo(x, y, z){ }';
+    let inputVector = '1|3|[2,2,2]';
     let parsedCode = parseCode(inputCode);
-    var table = parsedCodeToSymbolicSubstitutionWithColor(parsedCode,);
-    it('function declaration appears', () => {
-        assert.equal(table.length,1);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('function declaration length', () => {
+        assert.equal(output.length,2);
     });
     it('function declaration appears right', () => {
-        assert.equal(JSON.stringify(table[0]),JSON.stringify({Line:1, Type:'function declaration', Name:'onlyDeclaration', Condition:'', Value:''}));
-    });
-});
-
-
-
-//
-//
-//
-//
-//
-// ---------------------part 1------------------------
-//
-//
-//
-//
-//
-//
-//
-
-describe('The javascript parser', () => {
-    it('is parsing an empty function correctly', () => {
-        assert.equal(
-            JSON.stringify(parseCode('')),
-            '{"type":"Program","body":[],"sourceType":"script"}'
-        );
-    });
-
-    it('is parsing a simple variable declaration correctly', () => {
-        assert.equal(
-            JSON.stringify(parseCode('let a = 1;')),
-            '{"type":"Program","body":[{"type":"VariableDeclaration","declarations":[{"type":"VariableDeclarator","id":{"type":"Identifier","name":"a"},"init":{"type":"Literal","value":1,"raw":"1"}}],"kind":"let"}],"sourceType":"script"}'
-        );
-    });
-});
-
-describe('function declaration', () => {
-    let inputCode = 'function onlyDeclaration(){ }';
-    let parsedCode = parseCode(inputCode);
-    var table = parsedCodeToTable(parsedCode);
-    it('function declaration appears', () => {
-        assert.equal(table.length,1);
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
     });
     it('function declaration appears right', () => {
-        assert.equal(JSON.stringify(table[0]),JSON.stringify({Line:1, Type:'function declaration', Name:'onlyDeclaration', Condition:'', Value:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('function declaration variables test', () => {
-    let inputCode = 'function binarySearch(X,Y){}';
+describe('variables decleration', () => {
+    let inputCode = 'function foo(x, y, z){let low;}';
+    let inputVector = '1|3|[2,2,2]';
     let parsedCode = parseCode(inputCode);
-    var table = parsedCodeToTable(parsedCode);
-    it('function variables declaration appears', () => {
-        assert.equal(table.length,3);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('variables decleration appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
     });
-    it('function declaration variables appears right 1', () => {
-        assert.equal(JSON.stringify(table[1]),JSON.stringify({Line:1, Type:'variable declaration', Name:'X', Condition:'', Value:''}));
-    });
-    it('function declaration variables appears right 2', () => {
-        assert.equal(JSON.stringify(table[2]),JSON.stringify({Line:1, Type:'variable declaration', Name:'Y', Condition:'', Value:''}));
+    it('variables decleration appears right', () => {
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('variables declaration test', () => {
-    let inputCode = 'function variablesFunc()' +
-        '{let low, high};';
+describe('variables assignment', () => {
+    let inputCode = 'function foo(x, y, z){let low; low=5; low=low+1;}';
+    let inputVector = '1|3|[2,2,2]';
     let parsedCode = parseCode(inputCode);
-    let table = parsedCodeToTable(parsedCode);
-    it('variables declaration appears', () => {
-        assert.equal(table.length,3);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('variables decleration appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
     });
-    it('variables appears right 1', () => {
-        assert.equal(JSON.stringify(table[1]),JSON.stringify({Line:1, Type:'variable declaration', Name:'low', Condition:'', Value:'null'}));
-    });
-    it('function declaration variables appears right 2', () => {
-        assert.equal(JSON.stringify(table[2]),JSON.stringify({Line:1, Type:'variable declaration', Name:'high', Condition:'', Value:'null'}));
+    it('variables decleration appears right', () => {
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('variables declaration test', () => {
-    let inputCode = 'function variablesFunc()' +
-        '{let low, high}';
+describe('simple if test', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y;  let c = 0; if (b < z) {}}';
+    let inputVector = '1|3|2';
     let parsedCode = parseCode(inputCode);
-    let table = parsedCodeToTable(parsedCode);
-    it('variables declaration appears', () => {
-        assert.equal(table.length,3);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('if function length', () => {
+        assert.equal(output.length,4);
     });
-    it('variables test 1', () => {
-        assert.equal(JSON.stringify(table[1]),JSON.stringify({Line:1, Type:'variable declaration', Name:'low', Condition:'', Value:'null'}));
-    });
-    it('variables test 2', () => {
-        assert.equal(JSON.stringify(table[2]),JSON.stringify({Line:1, Type:'variable declaration', Name:'high', Condition:'', Value:'null'}));
+    it('simple if with variables decleration', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'if (x+1+y < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('assignment test', () => {
-    let inputCode = 'function assignmentTest(n){let low; low=5; low=low+1; low=n; low=n/2;}';
+describe('simple if with variables decleration and assignment', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y;  let c = 0; if (b < z) {c= c+5;}}';
+    let inputVector = '1|3|2';
     let parsedCode = parseCode(inputCode);
-    let table = parsedCodeToTable(parsedCode);
-    it('variables declaration appears', () => {
-        assert.equal(table.length,7);});
-    it('assignment test  1', () => {
-        assert.equal(JSON.stringify(table[3]),JSON.stringify({Line:3, Type:'assignment expression', Name:'low', Condition:'', Value:5}));
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('simple if with assignment function length', () => {
+        assert.equal(output.length,4);
     });
-    it('assignment test  1', () => {
-        assert.equal(JSON.stringify(table[4]),JSON.stringify({Line:4, Type:'assignment expression', Name:'low', Condition:'', Value:'low+1'}));
-    });
-    it('assignment test  3', () => {
-        assert.equal(JSON.stringify(table[5]),JSON.stringify({Line:5, Type:'assignment expression', Name:'low', Condition:'', Value:'n'}));
-    });
-    it('assignment test  4', () => {
-        assert.equal(JSON.stringify(table[6]),JSON.stringify({Line:6, Type:'assignment expression', Name:'low', Condition:'', Value:'n/2'}));
+    it('simple if with assignment appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'if (x+1+y < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('while test', () => {
-    let inputCode = 'function whileTest(X, V, n){ let low, high, mid; low = 0; high = n - 1; while (low <= high) {low=low+2;}}';
+describe('simple if with return', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y;  let c = 0; if (b < z) {c= c+5; return x + y + z + c;}}';
+    let inputVector = '1|3|2';
     let parsedCode = parseCode(inputCode);
-    let table = parsedCodeToTable(parsedCode);
-    it('variables declaration appears', () => {
-        assert.equal(table.length,11);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('simple if with assignment function length', () => {
+        assert.equal(output.length,5);
     });
-    it('while test 1', () => {
-        assert.equal(JSON.stringify(table[9]),JSON.stringify({Line:5, Type:'while statement', Name:'', Condition:'low<=high', Value:''}));
-    });
-    it('while test 2', () => {
-        assert.equal(JSON.stringify(table[10]),JSON.stringify({Line:6, Type:'assignment expression', Name:'low', Condition:'', Value:'low+2'}));
+    it('simple if with assignment appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'if (x+1+y < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'return x+y+z+5;', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[4]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('simple if test',() => {
-    let inputCode = 'function ifTest(X, V, n){let low, high, mid;low = 0;high = n - 1; if (X < V){low= low+1;}}' ;
+describe('simple if with return', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y;  let c = 0; if (b < z) {c= c+5; return x + y + z + c;}}';
+    let inputVector = '1|3|2';
     let parsedCode = parseCode(inputCode);
-    let table = parsedCodeToTable(parsedCode);
-    it('simple if without else test - number of lines test', () => {
-        assert.equal(table.length,11);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('simple if with assignment function length', () => {
+        assert.equal(output.length,5);
     });
-    it('simple if without else test - if line test', () => {
-        assert.equal(JSON.stringify(table[9]),JSON.stringify({Line:5, Type:'if statement', Name:'', Condition:'X<V', Value:''}));
-    });
-    it('simple if without else test - block inside if statement test', () => {
-        assert.equal(JSON.stringify(table[10]),JSON.stringify({Line:6, Type:'assignment expression', Name:'low', Condition:'', Value:'low+1'}));
-    });
-});
-
-describe('nested if test',() => {
-    let inputCode2 = 'function ifTest(X, V, n){let low, high, mid;low = 0;high = n - 1; if (X < V){if (X==1){ X=X+1;} else {X=X+2;}}}' ;
-    let parsedCode2 = parseCode(inputCode2);
-    let table2 = parsedCodeToTable(parsedCode2);
-
-    it('nested if with else test - number of lines test', () => {
-        assert.equal(table2.length,14);
-    });
-    it('nested if without else test - if line 1 test', () => {
-        assert.equal(JSON.stringify(table2[9]),JSON.stringify({Line:5, Type:'if statement', Name:'', Condition:'X<V', Value:''}));
-    });
-    it('nested if without else test - if line 2 test', () => {
-        assert.equal(JSON.stringify(table2[10]),JSON.stringify({Line:6, Type:'if statement', Name:'', Condition:'X==1', Value:''}));
-    });
-    it('nested if without else test - block inside if statement test', () => {
-        assert.equal(JSON.stringify(table2[11]),JSON.stringify({Line:7, Type:'assignment expression', Name:'X', Condition:'', Value:'X+1'}));
+    it('simple if with assignment appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'if (x+1+y < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'return x+y+z+5;', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[4]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('if else test',() => {
-    let inputCode3 = 'function ifTest(X, V, n){let low, high, mid;low = 0;high = n - 1; if (X < V){if (X==1){ X=X+1;} else{ X=X-1;}}}';
-    let parsedCode3 = parseCode(inputCode3);
-    let table3 = parsedCodeToTable(parsedCode3);
-
-    it('if else test 1- number of lines test', () => {
-        assert.equal(table3.length,14);
-    });
-    it('if else test - if line 1 test', () => {
-        assert.equal(JSON.stringify(table3[9]),JSON.stringify({Line:5, Type:'if statement', Name:'', Condition:'X<V', Value:''}));
-    });
-    it('if else test - if line 2 test', () => {
-        assert.equal(JSON.stringify(table3[10]),JSON.stringify({Line:6, Type:'if statement', Name:'', Condition:'X==1', Value:''}));
-    });
-    it('if else test - if else block inside if statement test', () => {
-        assert.equal(JSON.stringify(table3[11]),JSON.stringify({Line:7, Type:'assignment expression', Name:'X', Condition:'', Value:'X+1'}));
-    });
-});
-
-describe('if else test2',() => {
-    let inputCode4 = 'function ifTest(X, V, n){let low, high, mid;low = 0;high = n - 1; if (X < V){if (X==1){ if (X==7) X=X+1; X=X+1;} else{ X=X-1;}}}';
-    let parsedCode4 = parseCode(inputCode4);
-    let table4 = parsedCodeToTable(parsedCode4);
-    it('if else test 2 - number of lines test', () => {
-        assert.equal(table4.length,16);
-    });
-    it('if else test 2 - nested if block inside if else statement test', () => {
-        assert.equal(JSON.stringify(table4[11]),JSON.stringify({Line:7, Type:'if statement', Name:'', Condition:'X==7', Value:''}));
-    });
-    it('if else test 2 - nested if block inside if else statement assignment expression test', () => {
-        assert.equal(JSON.stringify(table4[12]),JSON.stringify({Line:8, Type:'assignment expression', Name:'X', Condition:'', Value:'X+1'}));
+describe('if else test', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y;  let c = 0; if (b < z) {c= c+5; return x + y + z + c;  } else if (b < z * 2) { c = c + x + 5;  return x + y + z + c;} else { c = c + z + 5;return x + y + z + c;}}';
+    let inputVector = '1|2|3';
+    let parsedCode = parseCode(inputCode);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('simple if else', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'if (x+1+y < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'return x+y+z+5;', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[4]),JSON.stringify({str:'else if (x+1+y < z*2) {', color:'green'}));
+        assert.equal(JSON.stringify(output[5]),JSON.stringify({str:'return x+y+z+0+x+5;', color:''}));
+        assert.equal(JSON.stringify(output[6]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[7]),JSON.stringify({str:'else{', color:'red'}));
+        assert.equal(JSON.stringify(output[8]),JSON.stringify({str:'return x+y+z+0+z+5;', color:''}));
+        assert.equal(JSON.stringify(output[9]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[10]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('else if test',() => {
-    let inputCode5 = 'function ifTest(X, V, n){if (X < V) X=1; else if(X<1){if (X==7) X=X+1; else if (X>7) X=X-1;} else{X=X-1;}}';
-    let parsedCode5 = parseCode(inputCode5);
-    let table5 = parsedCodeToTable(parsedCode5);
-
-    it('else if test 1', () => {
-        assert.equal(table5.length,13);
-    });
-    it('else if test 2', () => {
-        assert.equal(JSON.stringify(table5[6]),JSON.stringify({Line:4, Type:'else if statement', Name:'', Condition:'X<1', Value:''}));
-    });
-    it('else if test 3', () => {
-        assert.equal(JSON.stringify(table5[9]),JSON.stringify({Line:7, Type:'else if statement', Name:'', Condition:'X>7', Value:''}));
-    });
-});
-
-describe('return test',() => {
-    let inputCode6 = 'function ifTest(X, V, n){if (X < V) return X; else if(X<1){if (X==7) return 4; else if (X>7) return 3-1;} else{return X+n;}}';
-    let parsedCode6 = parseCode(inputCode6);
-    let table6 = parsedCodeToTable(parsedCode6);
-
-    it('return test - number of lines test', () => {
-        assert.equal(table6.length,13);
-    });
-    it('first return test', () => {
-        assert.equal(JSON.stringify(table6[5]),JSON.stringify({Line:3, Type:'return statement', Name:'', Condition:'', Value:'X'}));
-    });
-    it('second return test', () => {
-        assert.equal(JSON.stringify(table6[8]),JSON.stringify({Line:6, Type:'return statement', Name:'', Condition:'', Value:4}));
+describe('nested if else',() => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y;  let c = 0; if (b < z) {c= c+5; if(b>z+1){ return x + y + z + c;} else{ return x + y + z + c + 1; }} else if (b < z * 2) { c = c + x + 5;  return x + y + z + c;} else { c = c + z + 5; return x + y + z + c;}}';
+    let inputVector = '1|2|3';
+    let parsedCode = parseCode(inputCode);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('nested else appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'if (x+1+y < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'if (x+1+y > z+1) {', color:'red'}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'return x+y+z+5;', color:''}));
+        assert.equal(JSON.stringify(output[4]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[5]),JSON.stringify({str:'else{', color:'green'}));
+        assert.equal(JSON.stringify(output[6]),JSON.stringify({str:'return x+y+z+5+1;', color:''}));
+        assert.equal(JSON.stringify(output[7]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[8]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[9]),JSON.stringify({str:'else if (x+1+y < z*2) {', color:'green'}));
+        assert.equal(JSON.stringify(output[10]),JSON.stringify({str:'return x+y+z+0+x+5;', color:''}));
+        assert.equal(JSON.stringify(output[11]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[12]),JSON.stringify({str:'else{', color:'red'}));
+        assert.equal(JSON.stringify(output[13]),JSON.stringify({str:'return x+y+z+0+z+5;', color:''}));
+        assert.equal(JSON.stringify(output[14]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[15]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('unary test',() => {
-    let inputCode6 = 'function ifTest(X, V, n){return -1;}';
-    let parsedCode6 = parseCode(inputCode6);
-    let table6 = parsedCodeToTable(parsedCode6);
-
-    it('return test - number of lines test', () => {
-        assert.equal(table6.length,5);
+describe('simple while test ', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y; while (a < z) {}}';
+    let inputVector = '1|3|2';
+    let parsedCode = parseCode(inputCode);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('simple while with function length', () => {
+        assert.equal(output.length,4);
+    });
+    it('simple while with assignment appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'while ( x+1 < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('Member test',() => {
-    let inputCode6 = 'function ifTest(X, V, n){return x[v];}';
-    let parsedCode6 = parseCode(inputCode6);
-    let table6 = parsedCodeToTable(parsedCode6);
-
-    it('return test - number of lines test', () => {
-        assert.equal(table6.length,5);
+describe('simple while test with assignment', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y; while (a < z) {a= a+b;}}';
+    let inputVector = '1|3|2';
+    let parsedCode = parseCode(inputCode);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('simple while with assignment function length', () => {
+        assert.equal(output.length,4);
+    });
+    it('simple while with assignment appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'while ( x+1 < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
     });
 });
 
-describe('example of VariableDeclaration test',() => {
-    let inputCode6 = 'function ifTest(){let ;}';
-    let parsedCode6 = parseCode(inputCode6);
-    let table6 = parsedCodeToTable(parsedCode6);
-
-    it('return test - number of lines test', () => {
-        assert.equal(table6.length,1);
+describe('simple while with return test', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y;  let c = 0; while (a < z) {c= a+b; z = c * 2; return z;}}';
+    let inputVector = '1|3|2';
+    let parsedCode = parseCode(inputCode);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('simple while with return function length', () => {
+        assert.equal(output.length,5);
+    });
+    it('simple while with return appears right', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'while ( x+1 < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'return z;', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[4]),JSON.stringify({str:'}', color:''}));
     });
 });
 
+
+describe('if with while test', () => {
+    let inputCode = 'function foo(x, y, z){ let a = x + 1;  let b = a + y;  let c = 0; if (b < z) {c= c+5; return x + y + z + c;  } else { c = c + z + 5;return x + y + z + c;} while (x<y){ x=x+1}}';
+    let inputVector = '1|2|3';
+    let parsedCode = parseCode(inputCode);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('if while', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'if (x+1+y < z) {', color:'red'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'return x+y+z+5;', color:''}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[4]),JSON.stringify({str:'else{', color:'green'}));
+        assert.equal(JSON.stringify(output[5]),JSON.stringify({str:'return x+y+z+0+z+5;', color:''}));
+        assert.equal(JSON.stringify(output[6]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[7]),JSON.stringify({str:'while ( x < y) {', color:'green'}));
+        assert.equal(JSON.stringify(output[8]),JSON.stringify({str:'}', color:''}));
+    });
+});
+
+describe(' while inside if test', () => {
+    let inputCode = 'function foo(x, y, z){  if (x < z) {while(x<y){x = x+1}}else{while (z<x){z = z+1}}}';
+    let inputVector = '1|2|3';
+    let parsedCode = parseCode(inputCode);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('if while', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function foo (x, y, z){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'if (x < z) {', color:'green'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'while ( x < y) {', color:'green'}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[4]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[5]),JSON.stringify({str:'else{', color:'red'}));
+        assert.equal(JSON.stringify(output[6]),JSON.stringify({str:'while ( z < x) {', color:'red'}));
+        assert.equal(JSON.stringify(output[7]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[8]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[9]),JSON.stringify({str:'}', color:''}));
+
+    });
+});
+
+describe(' while inside if test', () => {
+    let inputCode = 'function binarySearch(X, V, n){let low, high, mid; low = 0; high = n - 1; while (low <= high) { mid = (low + high)/2; if (X < V[mid]){  high = mid - 1;}  else if (X > V[mid]){low = mid + 1;} else{ return -1;}}return -1;}';
+    let inputVector = '1|[2,2.2]|3';
+    let parsedCode = parseCode(inputCode);
+    let output = parsedCodeToSymbolicSubstitutionWithColor(inputVector,parsedCode);
+    it('if while', () => {
+        assert.equal(JSON.stringify(output[0]),JSON.stringify({str:'function binarySearch (X, V, n){', color:''}));
+        assert.equal(JSON.stringify(output[1]),JSON.stringify({str:'while ( 0 <= n-1) {', color:'green'}));
+        assert.equal(JSON.stringify(output[2]),JSON.stringify({str:'if (X < V[0+n-1/2]) {', color:'green'}));
+        assert.equal(JSON.stringify(output[3]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[4]),JSON.stringify({str:'else if (X > V[0+n-1/2]) {', color:'red'}));
+        assert.equal(JSON.stringify(output[5]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[6]),JSON.stringify({str:'else{', color:'green'}));
+        assert.equal(JSON.stringify(output[7]),JSON.stringify({str:'return -1;', color:''}));
+        assert.equal(JSON.stringify(output[8]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[9]),JSON.stringify({str:'}', color:''}));
+        assert.equal(JSON.stringify(output[10]),JSON.stringify({str:'return -1;', color:''}));
+        assert.equal(JSON.stringify(output[11]),JSON.stringify({str:'}', color:''}));
+
+
+    });
+});
